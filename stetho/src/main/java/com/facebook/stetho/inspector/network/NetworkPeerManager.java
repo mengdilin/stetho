@@ -52,6 +52,10 @@ public class NetworkPeerManager extends ChromePeerManager {
     return mResponseBodyFileManager;
   }
 
+  public AsyncPrettyPrinterRegistry getAsyncPrettyPrinterRegistry() {
+    return mAsyncPrettyPrinterRegistry;
+  }
+
   private final PeersRegisteredListener mTempFileCleanup = new PeersRegisteredListener() {
     @Override
     protected void onFirstPeerRegistered() {

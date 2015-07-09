@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import android.content.Context;
 import android.util.Base64;
@@ -31,6 +33,8 @@ public class ResponseBodyFileManager {
   private static final String FILENAME_PREFIX = "network-response-body-";
 
   private final Context mContext;
+
+  private Map<String, AsyncPrettyPrinter> mRequestIdMap = new HashMap<>();
 
   public ResponseBodyFileManager(Context context) {
     mContext = context;
@@ -56,7 +60,13 @@ public class ResponseBodyFileManager {
       }
       ResponseBodyData bodyData = new ResponseBodyData();
       bodyData.base64Encoded = firstByte != 0;
-      bodyData.data = readContentsAsUTF8(in);
+      if (mRequestIdMap.containsKey(requestId)) {
+        AsyncPrettyPrinter asyncPrettyPrinter = mRequestIdMap.get(requestId);
+        bodyData.data = prettyPrintContent(in, asyncPrettyPrinter);
+      }
+      else {
+        bodyData.data = readContentsAsUTF8(in);
+      }
       return bodyData;
     } finally {
       in.close();
@@ -67,6 +77,13 @@ public class ResponseBodyFileManager {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     Util.copy(in, out, new byte[1024]);
     return out.toString("UTF-8");
+  }
+
+  private String prettyPrintContent(InputStream in, AsyncPrettyPrinter asyncPrettyPrinter)
+      throws IOException {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    Util.copy(in, out, new byte[1024]);
+    return asyncPrettyPrinter.print(out.toByteArray());
   }
 
   public OutputStream openResponseBodyFile(String requestId, boolean base64Encode)
@@ -82,5 +99,13 @@ public class ResponseBodyFileManager {
 
   private static String getFilename(String requestId) {
     return FILENAME_PREFIX + requestId;
+  }
+
+  public boolean addAsyncPrettyPrinter(String requestId, AsyncPrettyPrinter asyncPrettyPrinter) {
+    if (mRequestIdMap.containsKey(requestId)) {
+      return false;
+    }
+    mRequestIdMap.put(requestId, asyncPrettyPrinter);
+    return true;
   }
 }
