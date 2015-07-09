@@ -142,7 +142,7 @@ public class Stetho {
         modules.add(new DOMStorage(context));
         modules.add(new HeapProfiler());
         modules.add(new Inspector());
-        modules.add(new Network(context, new DefaultAsyncPrettyPrinterRegistry()));
+        modules.add(new Network(context, DefaultAsyncPrettyPrinterRegistry.getInstance()));
         modules.add(new Page(context));
         modules.add(new Profiler());
         modules.add(new Runtime());

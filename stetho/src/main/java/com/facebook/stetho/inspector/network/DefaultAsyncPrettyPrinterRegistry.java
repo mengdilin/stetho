@@ -19,6 +19,15 @@ public class DefaultAsyncPrettyPrinterRegistry implements AsyncPrettyPrinterRegi
 
   @GuardedBy("this")
   private final Map<String, AsyncPrettyPrinterFactory> mRegistry = new HashMap<>();
+
+  private static DefaultAsyncPrettyPrinterRegistry sInstance;
+
+  public static synchronized DefaultAsyncPrettyPrinterRegistry getInstance() {
+    if (sInstance == null) {
+      sInstance = new DefaultAsyncPrettyPrinterRegistry();
+    }
+    return sInstance;
+  }
   
   public synchronized boolean register(String headerName, AsyncPrettyPrinterFactory factory) {
     if (mRegistry.containsKey(headerName)) {
