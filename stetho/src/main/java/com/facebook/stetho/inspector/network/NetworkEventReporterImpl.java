@@ -153,10 +153,9 @@ public class NetworkEventReporterImpl implements NetworkEventReporter {
           Page.ResourceType.OTHER;
       receivedParams.response = responseJSON;
 
-      AsyncPrettyPrinterRegistry registry= peerManager.getAsyncPrettyPrinterRegistry();
-      AsyncPrettyPrinterFactory factory = null;
-      for (int i = 0; i < response.headerCount(); i++) {
-        factory = registry.lookup(response.headerName(i));
+      AsyncPrettyPrinterRegistry registry = peerManager.getAsyncPrettyPrinterRegistry();
+      for (int i = 0, count = response.headerCount(); i < count; i++) {
+        AsyncPrettyPrinterFactory factory = registry.lookup(response.headerName(i));
         if (factory != null) {
           AsyncPrettyPrinter asyncPrettyPrinter = factory.getInstance(
               response.headerName(i),

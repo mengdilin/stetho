@@ -10,5 +10,5 @@
 package com.facebook.stetho.inspector.network;
 
 public interface AsyncPrettyPrinterFactory {
-  AsyncPrettyPrinter getInstance(String headerName, String headerValue);
+  public AsyncPrettyPrinter getInstance(String headerName, String headerValue);
 }
