@@ -12,4 +12,5 @@ package com.facebook.stetho.inspector.network;
 public interface AsyncPrettyPrinterRegistry {
   public boolean register (String headerName, AsyncPrettyPrinterFactory factory);
   public AsyncPrettyPrinterFactory lookup (String headerName);
+  public void unregister(String headerName);
 }

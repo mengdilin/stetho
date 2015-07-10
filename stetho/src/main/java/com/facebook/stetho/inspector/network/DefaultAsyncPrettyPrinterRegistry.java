@@ -28,7 +28,8 @@ public class DefaultAsyncPrettyPrinterRegistry implements AsyncPrettyPrinterRegi
     }
     return sInstance;
   }
-  
+
+  @Override
   public synchronized boolean register(String headerName, AsyncPrettyPrinterFactory factory) {
     if (mRegistry.containsKey(headerName)) {
       return false;
@@ -37,8 +38,9 @@ public class DefaultAsyncPrettyPrinterRegistry implements AsyncPrettyPrinterRegi
     return true;
   }
 
-  @Nullable
-  public synchronized AsyncPrettyPrinterFactory lookup(String headerName) {
+
+  @Override
+  public synchronized @Nullable AsyncPrettyPrinterFactory lookup(String headerName) {
     return mRegistry.get(headerName);
   }
 
