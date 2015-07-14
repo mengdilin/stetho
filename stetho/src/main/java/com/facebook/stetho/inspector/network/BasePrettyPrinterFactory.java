@@ -1,4 +1,4 @@
-package com.facebook.stethointernal.chrome.network;
+package com.facebook.stetho.inspector.network;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
