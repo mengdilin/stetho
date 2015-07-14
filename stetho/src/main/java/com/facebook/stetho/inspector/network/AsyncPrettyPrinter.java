@@ -9,6 +9,20 @@
 
 package com.facebook.stetho.inspector.network;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+
+/**
+ * Interface that callers need to implement in order to pretty print the payload received by Stetho
+ */
 public interface AsyncPrettyPrinter {
-  String print(byte[] payload);
+  /**
+   * Prints the prettified version of payload to output
+   *
+   * @param output Writes the prettified version of payload
+   * @param payload Response stream that has the raw data to be prettified
+   * @throws IOException
+   */
+  public void printTo(PrintWriter output, InputStream payload) throws IOException;
 }

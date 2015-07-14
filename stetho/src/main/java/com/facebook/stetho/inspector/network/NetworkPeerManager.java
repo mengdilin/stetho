@@ -21,7 +21,7 @@ public class NetworkPeerManager extends ChromePeerManager {
 
   private final ResponseBodyFileManager mResponseBodyFileManager;
 
-  private final AsyncPrettyPrinterRegistry mAsyncPrettyPrinterRegistry;
+  private AsyncPrettyPrinterRegistry mAsyncPrettyPrinterRegistry;
 
   @Nullable
   public static synchronized NetworkPeerManager getInstanceOrNull() {
@@ -37,6 +37,7 @@ public class NetworkPeerManager extends ChromePeerManager {
               context.getApplicationContext()),
           prettyPrinterRegistry);
     }
+    sInstance.mAsyncPrettyPrinterRegistry = prettyPrinterRegistry;
     return sInstance;
   }
 

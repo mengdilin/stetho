@@ -16,22 +16,18 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class AsyncPrettyPrinterRegistry {
+public class AsyncPrettyPrinterRegistry {
 
   @GuardedBy("this")
   private final Map<String, AsyncPrettyPrinterFactory> mRegistry = Collections.synchronizedMap(
       new HashMap<String, AsyncPrettyPrinterFactory>());
 
-  public synchronized boolean register(String headerName, AsyncPrettyPrinterFactory factory) {
-    if (mRegistry.containsKey(headerName)) {
-      return false;
-    }
+  public synchronized void register(String headerName, AsyncPrettyPrinterFactory factory) {
     mRegistry.put(headerName, factory);
-    return true;
   }
 
-
-  public synchronized @Nullable AsyncPrettyPrinterFactory lookup(String headerName) {
+  @Nullable
+  public synchronized AsyncPrettyPrinterFactory lookup(String headerName) {
     return mRegistry.get(headerName);
   }
 

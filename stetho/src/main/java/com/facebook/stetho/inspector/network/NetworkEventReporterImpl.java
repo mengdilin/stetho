@@ -152,22 +152,26 @@ public class NetworkEventReporterImpl implements NetworkEventReporter {
           getResourceTypeHelper().determineResourceType(contentType) :
           Page.ResourceType.OTHER;
       receivedParams.response = responseJSON;
-
-      AsyncPrettyPrinterRegistry registry = peerManager.getAsyncPrettyPrinterRegistry();
-      for (int i = 0, count = response.headerCount(); i < count; i++) {
-        AsyncPrettyPrinterFactory factory = registry.lookup(response.headerName(i));
-        if (factory != null) {
-          AsyncPrettyPrinter asyncPrettyPrinter = factory.getInstance(
-              response.headerName(i),
-              response.headerValue(i));
-          peerManager.getResponseBodyFileManager().addAsyncPrettyPrinter(
-              response.requestId(),
-              asyncPrettyPrinter);
-          break;
-        }
-      }
-
+      initAsyncPrettyPrinterForResponse(response, peerManager);
       peerManager.sendNotificationToPeers("Network.responseReceived", receivedParams);
+    }
+  }
+
+  private void initAsyncPrettyPrinterForResponse(
+      InspectorResponse response,
+      NetworkPeerManager peerManager) {
+    AsyncPrettyPrinterRegistry registry = peerManager.getAsyncPrettyPrinterRegistry();
+    for (int i = 0, count = response.headerCount(); i < count; i++) {
+      AsyncPrettyPrinterFactory factory = registry.lookup(response.headerName(i));
+      if (factory != null) {
+        AsyncPrettyPrinter asyncPrettyPrinter = factory.getInstance(
+            response.headerName(i),
+            response.headerValue(i));
+        peerManager.getResponseBodyFileManager().associateAsyncPrettyPrinterWithId(
+            response.requestId(),
+            asyncPrettyPrinter);
+        break;
+      }
     }
   }
 

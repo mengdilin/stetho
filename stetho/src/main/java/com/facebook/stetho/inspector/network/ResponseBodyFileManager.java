@@ -10,11 +10,14 @@
 package com.facebook.stetho.inspector.network;
 
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,10 +64,10 @@ public class ResponseBodyFileManager {
       ResponseBodyData bodyData = new ResponseBodyData();
       bodyData.base64Encoded = firstByte != 0;
       if (mRequestIdMap.containsKey(requestId)) {
+        //TODO: implement time out if pretty printing is blocking for a long time
         AsyncPrettyPrinter asyncPrettyPrinter = mRequestIdMap.get(requestId);
         bodyData.data = prettyPrintContent(in, asyncPrettyPrinter);
-      }
-      else {
+      } else {
         bodyData.data = readContentsAsUTF8(in);
       }
       return bodyData;
@@ -81,9 +84,10 @@ public class ResponseBodyFileManager {
 
   private String prettyPrintContent(InputStream in, AsyncPrettyPrinter asyncPrettyPrinter)
       throws IOException {
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    Util.copy(in, out, new byte[1024]);
-    return asyncPrettyPrinter.print(out.toByteArray());
+    StringWriter out = new StringWriter();
+    PrintWriter writer = new PrintWriter(out);
+    asyncPrettyPrinter.printTo(writer, in);
+    return out.toString();
   }
 
   public OutputStream openResponseBodyFile(String requestId, boolean base64Encode)
@@ -101,11 +105,22 @@ public class ResponseBodyFileManager {
     return FILENAME_PREFIX + requestId;
   }
 
-  public boolean addAsyncPrettyPrinter(String requestId, AsyncPrettyPrinter asyncPrettyPrinter) {
+  /**
+   * Associates an asynchronous pretty printer with a response request id
+   * The pretty printer will be used to pretty print the response body that has
+   * the particular request id
+   *
+   * @param requestId Unique identifier for the response
+   * as per {@link NetworkEventReporter.InspectorResponse#requestId()}
+   * @param asyncPrettyPrinter Asynchronous Pretty Printer to pretty print the response body
+   */
+  public void associateAsyncPrettyPrinterWithId(
+      String requestId,
+      AsyncPrettyPrinter asyncPrettyPrinter) {
     if (mRequestIdMap.containsKey(requestId)) {
-      return false;
+      throw new IllegalArgumentException("cannot associate different " +
+          "pretty printers with the same request id: "+requestId);
     }
     mRequestIdMap.put(requestId, asyncPrettyPrinter);
-    return true;
   }
 }
