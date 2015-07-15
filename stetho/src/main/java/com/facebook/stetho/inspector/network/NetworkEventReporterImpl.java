@@ -157,7 +157,7 @@ public class NetworkEventReporterImpl implements NetworkEventReporter {
     }
   }
 
-  private void initAsyncPrettyPrinterForResponse(
+  public static void initAsyncPrettyPrinterForResponse(
       InspectorResponse response,
       NetworkPeerManager peerManager) {
     AsyncPrettyPrinterRegistry registry = peerManager.getAsyncPrettyPrinterRegistry();

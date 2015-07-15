@@ -31,6 +31,7 @@ import android.content.Context;
 import android.util.Base64;
 import android.util.Base64OutputStream;
 
+import android.util.Log;
 import com.facebook.stetho.common.LogRedirector;
 import com.facebook.stetho.common.Util;
 
@@ -71,25 +72,11 @@ public class ResponseBodyFileManager {
       bodyData.base64Encoded = firstByte != 0;
 
       if (mRequestIdMap.containsKey(requestId)) {
-        //current response needs to be asynchronously pretty printed
         AsyncPrettyPrinter asyncPrettyPrinter = mRequestIdMap.get(requestId);
-        AsyncPrettyPrintingTask prettyPrintingTask = new AsyncPrettyPrintingTask(
-            in,
-            asyncPrettyPrinter);
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future<String> future = executor.submit(prettyPrintingTask);
-        try {
-          bodyData.data = future.get(1, TimeUnit.SECONDS);
-        } catch (TimeoutException | InterruptedException | ExecutionException e) {
-          future.cancel(true);
-          String errorMessage = "Failed to pretty print data\n";
-          bodyData.data = errorMessage + readContentsAsUTF8(in);
-        }
-        executor.shutdownNow();
+        bodyData.data = prettyPrintContentWithTimeOut(asyncPrettyPrinter, in);
       } else {
         bodyData.data = readContentsAsUTF8(in);
       }
-
       return bodyData;
     } finally {
       in.close();
@@ -100,6 +87,25 @@ public class ResponseBodyFileManager {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     Util.copy(in, out, new byte[1024]);
     return out.toString("UTF-8");
+  }
+
+  private String prettyPrintContentWithTimeOut(
+      AsyncPrettyPrinter asyncPrettyPrinter,
+      InputStream in) throws IOException {
+    AsyncPrettyPrintingTask prettyPrintingTask = new AsyncPrettyPrintingTask(
+        in,
+        asyncPrettyPrinter);
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+    Future<String> future = executor.submit(prettyPrintingTask);
+    String prettifiedContent = "";
+    try {
+      prettifiedContent = future.get(10, TimeUnit.SECONDS);
+    } catch (TimeoutException | InterruptedException | ExecutionException e) {
+      future.cancel(true);
+      prettifiedContent = "Failed to pretty print data\n" + readContentsAsUTF8(in);
+    }
+    executor.shutdownNow();
+    return prettifiedContent;
   }
 
   public OutputStream openResponseBodyFile(String requestId, boolean base64Encode)
