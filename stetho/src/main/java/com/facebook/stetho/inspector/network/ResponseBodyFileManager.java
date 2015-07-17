@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -31,7 +32,7 @@ import android.content.Context;
 import android.util.Base64;
 import android.util.Base64OutputStream;
 
-import android.util.Log;
+import com.facebook.stetho.common.ExceptionUtil;
 import com.facebook.stetho.common.LogRedirector;
 import com.facebook.stetho.common.Util;
 
@@ -44,7 +45,9 @@ public class ResponseBodyFileManager {
 
   private final Context mContext;
 
-  private Map<String, AsyncPrettyPrinter> mRequestIdMap = new HashMap<>();
+  private Map<String, AsyncPrettyPrinter> mRequestIdMap = Collections.synchronizedMap(
+      new HashMap<String, AsyncPrettyPrinter>());
+  private ExecutorService sExecutor = Executors.newSingleThreadExecutor();
 
   public ResponseBodyFileManager(Context context) {
     mContext = context;
@@ -92,20 +95,20 @@ public class ResponseBodyFileManager {
   private String prettyPrintContentWithTimeOut(
       AsyncPrettyPrinter asyncPrettyPrinter,
       InputStream in) throws IOException {
-    AsyncPrettyPrintingTask prettyPrintingTask = new AsyncPrettyPrintingTask(
+    AsyncPrettyPrintingCallable prettyPrintingCallable = new AsyncPrettyPrintingCallable(
         in,
         asyncPrettyPrinter);
-    ExecutorService executor = Executors.newSingleThreadExecutor();
-    Future<String> future = executor.submit(prettyPrintingTask);
-    String prettifiedContent = "";
+    Future<String> future = sExecutor.submit(prettyPrintingCallable);
     try {
-      prettifiedContent = future.get(10, TimeUnit.SECONDS);
-    } catch (TimeoutException | InterruptedException | ExecutionException e) {
+      return Util.getUninterruptibly(future, 10, TimeUnit.SECONDS);
+    } catch (TimeoutException e) {
       future.cancel(true);
-      prettifiedContent = "Failed to pretty print data\n" + readContentsAsUTF8(in);
+      return "Time out after 10 seconds of attempting to pretty print\n" + readContentsAsUTF8(in);
+    }  catch (ExecutionException e) {
+      Throwable cause = e.getCause();
+      ExceptionUtil.propagateIfInstanceOf(cause, IOException.class);
+      throw ExceptionUtil.propagate(cause);
     }
-    executor.shutdownNow();
-    return prettifiedContent;
   }
 
   public OutputStream openResponseBodyFile(String requestId, boolean base64Encode)
@@ -142,11 +145,11 @@ public class ResponseBodyFileManager {
     mRequestIdMap.put(requestId, asyncPrettyPrinter);
   }
 
-  private class AsyncPrettyPrintingTask implements Callable<String> {
+  private class AsyncPrettyPrintingCallable implements Callable<String> {
     private final InputStream mInputStream;
     private final AsyncPrettyPrinter mAsyncPrettyPrinter;
 
-    public AsyncPrettyPrintingTask(
+    public AsyncPrettyPrintingCallable(
         InputStream in,
         AsyncPrettyPrinter asyncPrettyPrinter) {
       mInputStream = in;

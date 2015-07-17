@@ -157,22 +157,32 @@ public class NetworkEventReporterImpl implements NetworkEventReporter {
     }
   }
 
-  public static void initAsyncPrettyPrinterForResponse(
+  static void initAsyncPrettyPrinterForResponse(
       InspectorResponse response,
       NetworkPeerManager peerManager) {
     AsyncPrettyPrinterRegistry registry = peerManager.getAsyncPrettyPrinterRegistry();
+    AsyncPrettyPrinter asyncPrettyPrinter = createPrettyPrinterForResponse(response, registry);
+    if (asyncPrettyPrinter != null) {
+      peerManager.getResponseBodyFileManager().associateAsyncPrettyPrinterWithId(
+          response.requestId(),
+          asyncPrettyPrinter);
+    }
+  }
+
+  @Nullable
+  private static AsyncPrettyPrinter createPrettyPrinterForResponse(
+      InspectorResponse response,
+      AsyncPrettyPrinterRegistry registry) {
     for (int i = 0, count = response.headerCount(); i < count; i++) {
       AsyncPrettyPrinterFactory factory = registry.lookup(response.headerName(i));
       if (factory != null) {
         AsyncPrettyPrinter asyncPrettyPrinter = factory.getInstance(
             response.headerName(i),
             response.headerValue(i));
-        peerManager.getResponseBodyFileManager().associateAsyncPrettyPrinterWithId(
-            response.requestId(),
-            asyncPrettyPrinter);
-        break;
+        return asyncPrettyPrinter;
       }
     }
+    return null;
   }
 
   @Override

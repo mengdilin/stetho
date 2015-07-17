@@ -18,9 +18,7 @@ import java.util.Map;
 
 public class AsyncPrettyPrinterRegistry {
 
-  @GuardedBy("this")
-  private final Map<String, AsyncPrettyPrinterFactory> mRegistry = Collections.synchronizedMap(
-      new HashMap<String, AsyncPrettyPrinterFactory>());
+  private final Map<String, AsyncPrettyPrinterFactory> mRegistry = new HashMap<>();
 
   public synchronized void register(String headerName, AsyncPrettyPrinterFactory factory) {
     mRegistry.put(headerName, factory);
@@ -32,9 +30,6 @@ public class AsyncPrettyPrinterRegistry {
   }
 
   public synchronized boolean unregister(String headerName) {
-    if (mRegistry.remove(headerName) == null) {
-      return false;
-    }
-    return true;
+    return mRegistry.remove(headerName) != null;
   }
 }

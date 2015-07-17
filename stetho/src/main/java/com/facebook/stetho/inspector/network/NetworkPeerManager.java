@@ -20,33 +20,26 @@ public class NetworkPeerManager extends ChromePeerManager {
   private static NetworkPeerManager sInstance;
 
   private final ResponseBodyFileManager mResponseBodyFileManager;
-
-  private AsyncPrettyPrinterRegistry mAsyncPrettyPrinterRegistry;
+  private final AsyncPrettyPrinterRegistry mAsyncPrettyPrinterRegistry;
 
   @Nullable
   public static synchronized NetworkPeerManager getInstanceOrNull() {
     return sInstance;
   }
 
-  public static synchronized NetworkPeerManager getOrCreateInstance(
-      Context context,
-      AsyncPrettyPrinterRegistry prettyPrinterRegistry) {
+  public static synchronized NetworkPeerManager getOrCreateInstance(Context context) {
     if (sInstance == null) {
       sInstance = new NetworkPeerManager(
           new ResponseBodyFileManager(
-              context.getApplicationContext()),
-          prettyPrinterRegistry);
+              context.getApplicationContext()));
     }
-    sInstance.mAsyncPrettyPrinterRegistry = prettyPrinterRegistry;
     return sInstance;
   }
 
-  public NetworkPeerManager(
-      ResponseBodyFileManager responseBodyFileManager,
-      AsyncPrettyPrinterRegistry asyncPrettyPrinterRegistry) {
+  public NetworkPeerManager(ResponseBodyFileManager responseBodyFileManager) {
     mResponseBodyFileManager = responseBodyFileManager;
     setListener(mTempFileCleanup);
-    mAsyncPrettyPrinterRegistry = asyncPrettyPrinterRegistry;
+    mAsyncPrettyPrinterRegistry = new AsyncPrettyPrinterRegistry();
   }
 
   public ResponseBodyFileManager getResponseBodyFileManager() {

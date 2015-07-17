@@ -34,10 +34,8 @@ public class Network implements ChromeDevtoolsDomain {
   private final NetworkPeerManager mNetworkPeerManager;
   private final ResponseBodyFileManager mResponseBodyFileManager;
 
-  public Network(Context context, AsyncPrettyPrinterRegistry asyncPrettyPrinterRegistry) {
-    mNetworkPeerManager = NetworkPeerManager.getOrCreateInstance(
-        context,
-        asyncPrettyPrinterRegistry);
+  public Network(Context context) {
+    mNetworkPeerManager = NetworkPeerManager.getOrCreateInstance(context);
     mResponseBodyFileManager = mNetworkPeerManager.getResponseBodyFileManager();
   }
 
@@ -87,6 +85,10 @@ public class Network implements ChromeDevtoolsDomain {
     response.body = bodyData.data;
     response.base64Encoded = bodyData.base64Encoded;
     return response;
+  }
+
+  public AsyncPrettyPrinterRegistry getAsyncPrettyPrinterRegistry() {
+    return mNetworkPeerManager.getAsyncPrettyPrinterRegistry();
   }
 
   private static class GetResponseBodyResponse implements JsonRpcResult {

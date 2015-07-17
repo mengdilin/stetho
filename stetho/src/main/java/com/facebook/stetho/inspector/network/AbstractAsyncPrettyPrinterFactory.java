@@ -10,10 +10,10 @@ import com.facebook.stetho.inspector.network.AsyncPrettyPrinter;
 import com.facebook.stetho.inspector.network.AsyncPrettyPrinterFactory;
 
 /**
- * Implementation of {@link AsyncPrettyPrinterFactory} which generates asynchronous pretty printers
- * that allows callers to pretty print responses with specific header names
+ * Abstract class for pretty printer factory that asynchronously downloads schema needed for
+ * pretty printing the payload
  */
-public abstract class BasePrettyPrinterFactory implements AsyncPrettyPrinterFactory {
+public abstract class AbstractAsyncPrettyPrinterFactory implements AsyncPrettyPrinterFactory {
 
   @Override
   public AsyncPrettyPrinter getInstance(String headerName, String headerValue) {
@@ -22,14 +22,12 @@ public abstract class BasePrettyPrinterFactory implements AsyncPrettyPrinterFact
     return new AsyncPrettyPrinter() {
       //TODO: pool byte array if this method is used frequently to avoid GC churn
       public void printTo(PrintWriter output, InputStream payload) throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        Util.copy(payload, out, new byte[1024]);
-        output.write(doPrint(out.toByteArray(), schema));
-        output.close();
+        doPrint(output, payload, schema);
       }
     };
   }
 
-  protected abstract String doPrint(byte[] payload, String schema);
-
+  protected abstract void doPrint(PrintWriter output, InputStream payload, String schema)
+      throws IOException;
 }
+

@@ -18,7 +18,9 @@ import java.io.PrintWriter;
  */
 public interface AsyncPrettyPrinter {
   /**
-   * Prints the prettified version of payload to output
+   * Prints the prettified version of payload to output. This method can block
+   * for a certain period of time. Note that Stetho may impose arbitrary
+   * time out on this method.
    *
    * @param output Writes the prettified version of payload
    * @param payload Response stream that has the raw data to be prettified

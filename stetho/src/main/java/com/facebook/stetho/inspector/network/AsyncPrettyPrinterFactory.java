@@ -15,8 +15,7 @@ package com.facebook.stetho.inspector.network;
 public interface AsyncPrettyPrinterFactory {
 
   /**
-   * Retrieves the Asynchronous Pretty Printer associated with the headerName
-   * and asynchronously download schema data from the URI provided in headerValue
+   * Creates an asynchronous pretty printer. This method must not be blocking.
    *
    * @param headerName header name of a response which is used to associate
    * with an asynchronous pretty printer

@@ -14,6 +14,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class Util {
   public static <T> T throwIfNull(T item) {
@@ -113,6 +117,22 @@ public class Util {
         return;
       } catch (InterruptedException e) {
         // Keep going...
+      }
+    }
+  }
+
+  public static <T> T getUninterruptibly(
+      Future<T> future,
+      long timeout,
+      TimeUnit unit) throws TimeoutException, ExecutionException {
+    long remaining = unit.toMillis(timeout);
+    long startTime = System.currentTimeMillis();
+    while (true) {
+      try {
+        return future.get(remaining, unit);
+      } catch (InterruptedException e) {
+        long gotFor = System.currentTimeMillis() - startTime;
+        remaining -= gotFor;
       }
     }
   }
