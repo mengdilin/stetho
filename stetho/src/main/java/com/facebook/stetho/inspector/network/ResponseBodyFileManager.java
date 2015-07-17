@@ -32,6 +32,7 @@ import android.content.Context;
 import android.util.Base64;
 import android.util.Base64OutputStream;
 
+import android.util.Log;
 import com.facebook.stetho.common.ExceptionUtil;
 import com.facebook.stetho.common.LogRedirector;
 import com.facebook.stetho.common.Util;
@@ -86,7 +87,7 @@ public class ResponseBodyFileManager {
     }
   }
 
-  private static String readContentsAsUTF8(InputStream in) throws IOException {
+  public static String readContentsAsUTF8(InputStream in) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     Util.copy(in, out, new byte[1024]);
     return out.toString("UTF-8");
@@ -163,10 +164,11 @@ public class ResponseBodyFileManager {
 
     private String prettyPrintContent(InputStream in, AsyncPrettyPrinter asyncPrettyPrinter)
         throws IOException {
-      StringWriter out = new StringWriter();
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
       PrintWriter writer = new PrintWriter(out);
       asyncPrettyPrinter.printTo(writer, in);
-      return out.toString();
+      writer.flush();
+      return out.toString("UTF-8");
     }
   }
 }

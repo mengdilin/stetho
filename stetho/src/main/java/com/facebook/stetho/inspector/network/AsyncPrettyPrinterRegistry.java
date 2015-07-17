@@ -10,7 +10,6 @@
 package com.facebook.stetho.inspector.network;
 
 import javax.annotation.Nullable;
-import javax.annotation.concurrent.GuardedBy;
 
 import java.util.Collections;
 import java.util.HashMap;

@@ -129,10 +129,21 @@ public class Util {
     long startTime = System.currentTimeMillis();
     while (true) {
       try {
-        return future.get(remaining, unit);
+        return future.get(remaining, TimeUnit.MILLISECONDS);
       } catch (InterruptedException e) {
         long gotFor = System.currentTimeMillis() - startTime;
         remaining -= gotFor;
+      }
+    }
+  }
+
+  public static <T> T getUninterruptibly(Future<T> future)
+      throws ExecutionException {
+    while (true) {
+      try {
+        return future.get();
+      } catch (InterruptedException e) {
+        //Keep going...
       }
     }
   }

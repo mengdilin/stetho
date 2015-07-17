@@ -152,16 +152,20 @@ public class NetworkEventReporterImpl implements NetworkEventReporter {
           getResourceTypeHelper().determineResourceType(contentType) :
           Page.ResourceType.OTHER;
       receivedParams.response = responseJSON;
-      initAsyncPrettyPrinterForResponse(response, peerManager);
+      initAsyncPrettyPrinterForResponse(response, peerManager, receivedParams);
       peerManager.sendNotificationToPeers("Network.responseReceived", receivedParams);
     }
   }
 
   static void initAsyncPrettyPrinterForResponse(
       InspectorResponse response,
-      NetworkPeerManager peerManager) {
+      NetworkPeerManager peerManager,
+      Network.ResponseReceivedParams receivedParams) {
     AsyncPrettyPrinterRegistry registry = peerManager.getAsyncPrettyPrinterRegistry();
-    AsyncPrettyPrinter asyncPrettyPrinter = createPrettyPrinterForResponse(response, registry);
+    AsyncPrettyPrinter asyncPrettyPrinter = createPrettyPrinterForResponse(
+        response,
+        registry,
+        receivedParams);
     if (asyncPrettyPrinter != null) {
       peerManager.getResponseBodyFileManager().associateAsyncPrettyPrinterWithId(
           response.requestId(),
@@ -172,10 +176,12 @@ public class NetworkEventReporterImpl implements NetworkEventReporter {
   @Nullable
   private static AsyncPrettyPrinter createPrettyPrinterForResponse(
       InspectorResponse response,
-      AsyncPrettyPrinterRegistry registry) {
+      AsyncPrettyPrinterRegistry registry,
+      Network.ResponseReceivedParams receivedParams) {
     for (int i = 0, count = response.headerCount(); i < count; i++) {
       AsyncPrettyPrinterFactory factory = registry.lookup(response.headerName(i));
       if (factory != null) {
+        receivedParams.type = factory.getPrettifiedType();
         AsyncPrettyPrinter asyncPrettyPrinter = factory.getInstance(
             response.headerName(i),
             response.headerValue(i));
