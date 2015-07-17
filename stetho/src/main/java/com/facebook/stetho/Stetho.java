@@ -36,8 +36,6 @@ import com.facebook.stetho.inspector.ChromeDiscoveryHandler;
 import com.facebook.stetho.inspector.elements.android.ActivityTracker;
 import com.facebook.stetho.inspector.elements.android.AndroidDOMConstants;
 import com.facebook.stetho.inspector.elements.android.AndroidDOMProviderFactory;
-import com.facebook.stetho.inspector.network.AsyncPrettyPrinterRegistry;
-import com.facebook.stetho.inspector.network.FlatBufferPrettyPrinterFactory;
 import com.facebook.stetho.inspector.protocol.ChromeDevtoolsDomain;
 import com.facebook.stetho.inspector.protocol.module.CSS;
 import com.facebook.stetho.inspector.protocol.module.Console;
