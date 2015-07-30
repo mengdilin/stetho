@@ -32,7 +32,7 @@ public interface AsyncPrettyPrinterFactory {
    * before the content is actually pretty printed. Stetho uses this
    * method to make a hopeful guess of the type of prettified content
    *
-   * @return {@see Page.ResourceType}
+   * @return an enum defined by ResourceType class
    */
   public Page.ResourceType getPrettifiedType();
 }

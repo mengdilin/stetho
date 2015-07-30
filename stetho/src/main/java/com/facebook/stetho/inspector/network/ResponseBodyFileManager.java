@@ -32,7 +32,6 @@ import android.content.Context;
 import android.util.Base64;
 import android.util.Base64OutputStream;
 
-import android.util.Log;
 import com.facebook.stetho.common.ExceptionUtil;
 import com.facebook.stetho.common.LogRedirector;
 import com.facebook.stetho.common.Util;

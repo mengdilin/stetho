@@ -77,7 +77,6 @@ public abstract class AbstractAsyncPrettyPrinterFactory implements AsyncPrettyPr
       this.body = body;
     }
 
-    //TODO: pool byte array if this method is used frequently to avoid GC churn
     public String getBody() throws IOException {
       return ResponseBodyFileManager.readContentsAsUTF8(body);
     }
