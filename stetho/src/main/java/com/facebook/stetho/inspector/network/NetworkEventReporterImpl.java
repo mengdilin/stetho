@@ -10,6 +10,7 @@
 package com.facebook.stetho.inspector.network;
 
 import android.os.SystemClock;
+import android.util.Log;
 import com.facebook.stetho.common.Utf8Charset;
 import com.facebook.stetho.inspector.console.CLog;
 import com.facebook.stetho.inspector.protocol.module.Console;
@@ -157,31 +158,28 @@ public class NetworkEventReporterImpl implements NetworkEventReporter {
     }
   }
 
-  static void initAsyncPrettyPrinterForResponse(
+   void initAsyncPrettyPrinterForResponse(
       InspectorResponse response,
       NetworkPeerManager peerManager,
       Network.ResponseReceivedParams receivedParams) {
     AsyncPrettyPrinterRegistry registry = peerManager.getAsyncPrettyPrinterRegistry();
-    AsyncPrettyPrinter asyncPrettyPrinter = createPrettyPrinterForResponse(
-        response,
-        registry,
-        receivedParams);
+    AsyncPrettyPrinter asyncPrettyPrinter = createPrettyPrinterForResponse(response, registry);
     if (asyncPrettyPrinter != null) {
       peerManager.getResponseBodyFileManager().associateAsyncPrettyPrinterWithId(
           response.requestId(),
           asyncPrettyPrinter);
+      receivedParams.type = getResourceTypeHelper().determineResourceType(
+          asyncPrettyPrinter.getPrettifiedType().getDisplayType());
     }
   }
 
   @Nullable
   private static AsyncPrettyPrinter createPrettyPrinterForResponse(
       InspectorResponse response,
-      AsyncPrettyPrinterRegistry registry,
-      Network.ResponseReceivedParams receivedParams) {
+      AsyncPrettyPrinterRegistry registry) {
     for (int i = 0, count = response.headerCount(); i < count; i++) {
       AsyncPrettyPrinterFactory factory = registry.lookup(response.headerName(i));
       if (factory != null) {
-        receivedParams.type = factory.getPrettifiedType();
         AsyncPrettyPrinter asyncPrettyPrinter = factory.getInstance(
             response.headerName(i),
             response.headerValue(i));
@@ -191,7 +189,7 @@ public class NetworkEventReporterImpl implements NetworkEventReporter {
     return null;
   }
 
-  @Override
+
   public InputStream interpretResponseStream(
       String requestId,
       @Nullable String contentType,

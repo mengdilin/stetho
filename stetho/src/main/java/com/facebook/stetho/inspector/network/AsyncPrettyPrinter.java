@@ -14,7 +14,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 
 /**
- * Interface that callers need to implement in order to pretty print the payload received by Stetho
+ * Interface that callers need to implement in order to pretty print binary payload received by Stetho
  */
 public interface AsyncPrettyPrinter {
   /**
@@ -27,4 +27,13 @@ public interface AsyncPrettyPrinter {
    * @throws IOException
    */
   public void printTo(PrintWriter output, InputStream payload) throws IOException;
+
+  /**
+   * Specifies the type of pretty printed content. Note that this method is called
+   * before the content is actually pretty printed. Stetho uses this
+   * method to make a hopeful guess of the type of prettified content
+   *
+   * @return an enum defined by PrettyPrinterDisplayType class
+   */
+  public DownloadingAsyncPrettyPrinterFactory.PrettyPrinterDisplayType getPrettifiedType();
 }

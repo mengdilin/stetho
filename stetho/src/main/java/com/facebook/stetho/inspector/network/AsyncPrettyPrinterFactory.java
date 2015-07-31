@@ -26,13 +26,4 @@ public interface AsyncPrettyPrinterFactory {
    * @return an asynchronous pretty printer to prettify the response body
    */
   public AsyncPrettyPrinter getInstance(String headerName, String headerValue);
-
-  /**
-   * Specifies the type of pretty printed content. Note that this method is called
-   * before the content is actually pretty printed. Stetho uses this
-   * method to make a hopeful guess of the type of prettified content
-   *
-   * @return an enum defined by ResourceType class
-   */
-  public Page.ResourceType getPrettifiedType();
 }

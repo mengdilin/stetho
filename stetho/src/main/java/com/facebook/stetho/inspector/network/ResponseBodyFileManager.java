@@ -47,7 +47,8 @@ public class ResponseBodyFileManager {
 
   private Map<String, AsyncPrettyPrinter> mRequestIdMap = Collections.synchronizedMap(
       new HashMap<String, AsyncPrettyPrinter>());
-  private ExecutorService sExecutor = Executors.newSingleThreadExecutor();
+  private ExecutorService sExecutor =
+      AsyncPrettyPrinterExecutorHolder.sExecutorService;
 
   public ResponseBodyFileManager(Context context) {
     mContext = context;
@@ -74,8 +75,9 @@ public class ResponseBodyFileManager {
       ResponseBodyData bodyData = new ResponseBodyData();
       bodyData.base64Encoded = firstByte != 0;
 
-      if (mRequestIdMap.containsKey(requestId)) {
-        AsyncPrettyPrinter asyncPrettyPrinter = mRequestIdMap.get(requestId);
+
+      AsyncPrettyPrinter asyncPrettyPrinter = mRequestIdMap.get(requestId);
+      if (asyncPrettyPrinter != null) {
         bodyData.data = prettyPrintContentWithTimeOut(asyncPrettyPrinter, in);
       } else {
         bodyData.data = readContentsAsUTF8(in);
@@ -138,11 +140,10 @@ public class ResponseBodyFileManager {
   public void associateAsyncPrettyPrinterWithId(
       String requestId,
       AsyncPrettyPrinter asyncPrettyPrinter) {
-    if (mRequestIdMap.containsKey(requestId)) {
+    if (mRequestIdMap.put(requestId, asyncPrettyPrinter) != null) {
       throw new IllegalArgumentException("cannot associate different " +
           "pretty printers with the same request id: "+requestId);
     }
-    mRequestIdMap.put(requestId, asyncPrettyPrinter);
   }
 
   private class AsyncPrettyPrintingCallable implements Callable<String> {

@@ -19,7 +19,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.never;
 import static org.mockito.Matchers.any;
 
-import com.facebook.stetho.inspector.network.NetworkEventReporter;
 import com.facebook.stetho.inspector.protocol.module.Network;
 import com.facebook.stetho.inspector.protocol.module.Page;
 import org.junit.Before;
@@ -139,7 +138,7 @@ public class AsyncPrettyPrintResponseBodyTest {
     );
   }
 
-  private class PrettyPrinterTestFactory extends AbstractAsyncPrettyPrinterFactory {
+  private class PrettyPrinterTestFactory extends DownloadingAsyncPrettyPrinterFactory {
     @Override
     protected void doPrint(PrintWriter output, InputStream payload, String schema)
         throws IOException {
