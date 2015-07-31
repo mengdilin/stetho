@@ -20,6 +20,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Matchers.any;
 
 import com.facebook.stetho.inspector.network.NetworkEventReporter;
+import com.facebook.stetho.inspector.protocol.module.Network;
+import com.facebook.stetho.inspector.protocol.module.Page;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -98,7 +100,11 @@ public class AsyncPrettyPrintResponseBodyTest {
         headerValues,
         TEST_REQUEST_ID
     );
-    NetworkEventReporterImpl.initAsyncPrettyPrinterForResponse(testResponse, mNetworkPeerManager);
+    Network.ResponseReceivedParams receivedParams = new Network.ResponseReceivedParams();
+    NetworkEventReporterImpl.initAsyncPrettyPrinterForResponse(
+        testResponse,
+        mNetworkPeerManager,
+        receivedParams);
     verify(mResponseBodyFileManager, times(1)).associateAsyncPrettyPrinterWithId(
         eq(TEST_REQUEST_ID),
         any(AsyncPrettyPrinter.class)
@@ -122,7 +128,11 @@ public class AsyncPrettyPrintResponseBodyTest {
         headerValues,
         TEST_REQUEST_ID
     );
-    NetworkEventReporterImpl.initAsyncPrettyPrinterForResponse(testResponse, mNetworkPeerManager);
+    Network.ResponseReceivedParams receivedParams = new Network.ResponseReceivedParams();
+    NetworkEventReporterImpl.initAsyncPrettyPrinterForResponse(
+        testResponse,
+        mNetworkPeerManager,
+        receivedParams);
     verify(mResponseBodyFileManager, never()).associateAsyncPrettyPrinterWithId(
         eq(TEST_REQUEST_ID),
         any(AsyncPrettyPrinter.class)
@@ -138,6 +148,16 @@ public class AsyncPrettyPrintResponseBodyTest {
       String prettifiedContent = PRETTY_PRINT_PREFIX + Arrays.toString(out.toByteArray());
       output.write(prettifiedContent);
       output.close();
+    }
+
+    @Override @Nullable
+    protected String parseHeaderValueToUri(String headerName, String headerValue) {
+      return "https://www.facebook.com";
+    }
+
+    @Override
+    public Page.ResourceType getPrettifiedType() {
+      return Page.ResourceType.OTHER;
     }
   }
 

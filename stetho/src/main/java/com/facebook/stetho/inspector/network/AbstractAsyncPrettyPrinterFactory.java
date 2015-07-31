@@ -30,7 +30,7 @@ public abstract class AbstractAsyncPrettyPrinterFactory implements AsyncPrettyPr
   @Override
   public AsyncPrettyPrinter getInstance(String headerName, String headerValue) {
     try {
-      String uri = parseHeaderValueToUri(headerValue);
+      String uri = parseHeaderValueToUri(headerName, headerValue);
       final Future<Response> response = sExecutorService.submit(new Request(new URL(uri)));
       return new AsyncPrettyPrinter() {
         public void printTo(PrintWriter output, InputStream payload)
@@ -52,7 +52,7 @@ public abstract class AbstractAsyncPrettyPrinterFactory implements AsyncPrettyPr
   }
 
   @Nullable
-  protected abstract String parseHeaderValueToUri(String headerValue);
+  protected abstract String parseHeaderValueToUri(String headerName, String headerValue);
 
   protected abstract void doPrint(PrintWriter output, InputStream payload, String schema)
       throws IOException;
