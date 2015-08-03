@@ -19,6 +19,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.never;
 import static org.mockito.Matchers.any;
 
+import com.facebook.stetho.inspector.network.DownloadingAsyncPrettyPrinterFactory;
+import com.facebook.stetho.inspector.network.NetworkEventReporterImpl;
 import com.facebook.stetho.inspector.protocol.module.Network;
 import com.facebook.stetho.inspector.protocol.module.Page;
 import org.junit.Before;
@@ -99,11 +101,9 @@ public class AsyncPrettyPrintResponseBodyTest {
         headerValues,
         TEST_REQUEST_ID
     );
-    Network.ResponseReceivedParams receivedParams = new Network.ResponseReceivedParams();
     NetworkEventReporterImpl.initAsyncPrettyPrinterForResponse(
         testResponse,
-        mNetworkPeerManager,
-        receivedParams);
+        mNetworkPeerManager);
     verify(mResponseBodyFileManager, times(1)).associateAsyncPrettyPrinterWithId(
         eq(TEST_REQUEST_ID),
         any(AsyncPrettyPrinter.class)
@@ -127,11 +127,9 @@ public class AsyncPrettyPrintResponseBodyTest {
         headerValues,
         TEST_REQUEST_ID
     );
-    Network.ResponseReceivedParams receivedParams = new Network.ResponseReceivedParams();
     NetworkEventReporterImpl.initAsyncPrettyPrinterForResponse(
         testResponse,
-        mNetworkPeerManager,
-        receivedParams);
+        mNetworkPeerManager);
     verify(mResponseBodyFileManager, never()).associateAsyncPrettyPrinterWithId(
         eq(TEST_REQUEST_ID),
         any(AsyncPrettyPrinter.class)
@@ -150,13 +148,8 @@ public class AsyncPrettyPrintResponseBodyTest {
     }
 
     @Override @Nullable
-    protected String parseHeaderValueToUri(String headerName, String headerValue) {
-      return "https://www.facebook.com";
-    }
-
-    @Override
-    public Page.ResourceType getPrettifiedType() {
-      return Page.ResourceType.OTHER;
+    protected MatchResult matchAndParseHeader(String headerName, String headerValue) {
+      return new MatchResult("https://www.facebook.com", PrettyPrinterDisplayType.TEXT);
     }
   }
 
