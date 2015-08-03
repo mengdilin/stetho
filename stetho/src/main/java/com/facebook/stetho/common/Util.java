@@ -9,6 +9,7 @@
 
 package com.facebook.stetho.common;
 
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -146,5 +147,11 @@ public class Util {
         //Keep going...
       }
     }
+  }
+
+  public static String readAsUTF8(InputStream in) throws IOException {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    copy(in, out, new byte[1024]);
+    return out.toString("UTF-8");
   }
 }

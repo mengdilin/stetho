@@ -168,9 +168,16 @@ public class NetworkEventReporterImpl implements NetworkEventReporter {
       peerManager.getResponseBodyFileManager().associateAsyncPrettyPrinterWithId(
           response.requestId(),
           asyncPrettyPrinter);
-      receivedParams.type = getResourceTypeHelper().determineResourceType(
-          asyncPrettyPrinter.getPrettifiedType().getDisplayType());
+      modifyReceivedParamsForAsyncPrettyPrinter(receivedParams, asyncPrettyPrinter);
     }
+  }
+
+  void modifyReceivedParamsForAsyncPrettyPrinter(
+      Network.ResponseReceivedParams receivedParams,
+      AsyncPrettyPrinter asyncPrettyPrinter
+  ) {
+    receivedParams.type = getResourceTypeHelper().determineResourceType(
+        asyncPrettyPrinter.getPrettifiedType().getDisplayType());
   }
 
   @Nullable

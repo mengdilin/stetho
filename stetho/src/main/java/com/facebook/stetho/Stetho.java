@@ -141,8 +141,6 @@ public class Stetho {
         modules.add(new DOMStorage(context));
         modules.add(new HeapProfiler());
         modules.add(new Inspector());
-        //Network network = new Network(context);
-        //network.getAsyncPrettyPrinterRegistry().register("Transfer-Encoding", new FlatBufferPrettyPrinterFactory());
         modules.add(new Network(context));
         modules.add(new Page(context));
         modules.add(new Profiler());
