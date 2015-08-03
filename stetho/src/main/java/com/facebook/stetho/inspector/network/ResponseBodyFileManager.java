@@ -65,16 +65,16 @@ public class ResponseBodyFileManager {
   }
 
   public ResponseBodyData readFile(String requestId) throws IOException {
-    final InputStream in = mContext.openFileInput(getFilename(requestId));
+    InputStream in = mContext.openFileInput(getFilename(requestId));
     try {
       int firstByte = in.read();
       if (firstByte == -1) {
         throw new EOFException("Failed to read base64Encode byte");
       }
-      final ResponseBodyData bodyData = new ResponseBodyData();
+      ResponseBodyData bodyData = new ResponseBodyData();
       bodyData.base64Encoded = firstByte != 0;
 
-      final AsyncPrettyPrinter asyncPrettyPrinter = mRequestIdMap.get(requestId);
+      AsyncPrettyPrinter asyncPrettyPrinter = mRequestIdMap.get(requestId);
       if (asyncPrettyPrinter != null) {
         bodyData.data = prettyPrintContentWithTimeOut(asyncPrettyPrinter, in);
       } else {

@@ -10,7 +10,6 @@
 package com.facebook.stetho.inspector.network;
 
 import android.os.SystemClock;
-import android.util.Log;
 import com.facebook.stetho.common.Utf8Charset;
 import com.facebook.stetho.inspector.console.CLog;
 import com.facebook.stetho.inspector.protocol.module.Console;
