@@ -198,7 +198,7 @@ public class NetworkEventReporterImpl implements NetworkEventReporter {
     return null;
   }
 
-
+  @Override
   public InputStream interpretResponseStream(
       String requestId,
       @Nullable String contentType,
