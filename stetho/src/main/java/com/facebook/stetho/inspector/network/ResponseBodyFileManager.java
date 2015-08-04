@@ -76,6 +76,8 @@ public class ResponseBodyFileManager {
 
       AsyncPrettyPrinter asyncPrettyPrinter = mRequestIdMap.get(requestId);
       if (asyncPrettyPrinter != null) {
+        // TODO: this line blocks for up to 10 seconds and create problems as described
+        // in issue #243 allow asynchronous dispatch for MethodDispatcher
         bodyData.data = prettyPrintContentWithTimeOut(asyncPrettyPrinter, in);
       } else {
         bodyData.data = Util.readAsUTF8(in);
