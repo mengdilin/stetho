@@ -148,13 +148,11 @@ public class NetworkEventReporterImpl implements NetworkEventReporter {
       receivedParams.frameId = "1";
       receivedParams.loaderId = "1";
       receivedParams.timestamp = stethoNow() / 1000.0;
-      receivedParams.type = contentType != null ?
-          getResourceTypeHelper().determineResourceType(contentType) :
-          Page.ResourceType.OTHER;
       receivedParams.response = responseJSON;
       AsyncPrettyPrinter asyncPrettyPrinter =
           initAsyncPrettyPrinterForResponse(response, peerManager);
-      modifyReceivedParamsForAsyncPrettyPrinter(receivedParams, asyncPrettyPrinter);
+      receivedParams.type =
+          determineResourceType(asyncPrettyPrinter, contentType, getResourceTypeHelper());
       peerManager.sendNotificationToPeers("Network.responseReceived", receivedParams);
     }
   }
@@ -173,12 +171,16 @@ public class NetworkEventReporterImpl implements NetworkEventReporter {
      return asyncPrettyPrinter;
   }
 
-  private void modifyReceivedParamsForAsyncPrettyPrinter(
-      Network.ResponseReceivedParams receivedParams,
-      AsyncPrettyPrinter asyncPrettyPrinter) {
+  private static Page.ResourceType determineResourceType(
+      AsyncPrettyPrinter asyncPrettyPrinter,
+      String contentType,
+      ResourceTypeHelper resourceTypeHelper) {
     if (asyncPrettyPrinter != null) {
-      receivedParams.type = getResourceTypeHelper().determineResourceType(
-          asyncPrettyPrinter.getPrettifiedType().getDisplayType());
+      return asyncPrettyPrinter.getPrettifiedType().getResourceType();
+    } else {
+      return contentType != null ?
+          resourceTypeHelper.determineResourceType(contentType) :
+          Page.ResourceType.OTHER;
     }
   }
 

@@ -19,10 +19,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.never;
 import static org.mockito.Matchers.any;
 
-import com.facebook.stetho.inspector.network.DownloadingAsyncPrettyPrinterFactory;
-import com.facebook.stetho.inspector.network.NetworkEventReporterImpl;
-import com.facebook.stetho.inspector.protocol.module.Network;
-import com.facebook.stetho.inspector.protocol.module.Page;
 import org.junit.Before;
 import org.junit.Test;
 

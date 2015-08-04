@@ -24,18 +24,9 @@ public class ResourceTypeHelper {
     // know exactly why, but whatever.
     mMimeMatcher.addRule("text/javascript", Page.ResourceType.XHR);
     mMimeMatcher.addRule("application/json", Page.ResourceType.XHR);
-    mMimeMatcher.addRule(
-        DownloadingAsyncPrettyPrinterFactory.PrettyPrinterDisplayType.JSON.getDisplayType(),
-        Page.ResourceType.XHR);
 
     // Everything else gets a lame, unformatted blob.
     mMimeMatcher.addRule("text/*", Page.ResourceType.DOCUMENT);
-    mMimeMatcher.addRule(
-        DownloadingAsyncPrettyPrinterFactory.PrettyPrinterDisplayType.HTML.getDisplayType(),
-        Page.ResourceType.DOCUMENT);
-    mMimeMatcher.addRule(
-        DownloadingAsyncPrettyPrinterFactory.PrettyPrinterDisplayType.TEXT.getDisplayType(),
-        Page.ResourceType.DOCUMENT);
 
     // I think this disables preview.  Perhaps that's not what we want as the default but we'll
     // need some time to soak in real data to see for sure.

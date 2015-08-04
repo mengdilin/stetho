@@ -10,11 +10,13 @@
 package com.facebook.stetho.inspector.network;
 
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.ThreadSafe;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+@ThreadSafe
 public class AsyncPrettyPrinterRegistry {
 
   private final Map<String, AsyncPrettyPrinterFactory> mRegistry = new HashMap<>();

@@ -40,7 +40,7 @@ import com.facebook.stetho.common.Util;
 public class ResponseBodyFileManager {
   private static final String TAG = "ResponseBodyFileManager";
   private static final String FILENAME_PREFIX = "network-response-body-";
-  private static final int PRETTY_PRINT_TIMEOUT = 10;
+  private static final int PRETTY_PRINT_TIMEOUT_SEC = 10;
 
   private final Context mContext;
 
@@ -95,10 +95,10 @@ public class ResponseBodyFileManager {
         asyncPrettyPrinter);
     Future<String> future = sExecutorService.submit(prettyPrintingCallable);
     try {
-      return Util.getUninterruptibly(future, PRETTY_PRINT_TIMEOUT, TimeUnit.SECONDS);
+      return Util.getUninterruptibly(future, PRETTY_PRINT_TIMEOUT_SEC, TimeUnit.SECONDS);
     } catch (TimeoutException e) {
       future.cancel(true);
-      return "Time out after " + PRETTY_PRINT_TIMEOUT +
+      return "Time out after " + PRETTY_PRINT_TIMEOUT_SEC +
           " seconds of attempting to pretty print\n" + Util.readAsUTF8(in);
     }  catch (ExecutionException e) {
       Throwable cause = e.getCause();

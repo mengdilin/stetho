@@ -1,5 +1,6 @@
 package com.facebook.stetho.inspector.network;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -28,6 +29,9 @@ public abstract class DownloadingAsyncPrettyPrinterFactory implements AsyncPrett
   public AsyncPrettyPrinter getInstance(final String headerName, final String headerValue) {
 
     final MatchResult result = matchAndParseHeader(headerName, headerValue);
+    if (result == null) {
+      return getErrorAsyncPrettyPrinter(headerName, headerValue);
+    }
     String uri = result.getSchemaUri();
     URL schemaURL = parseURL(uri);
     if (schemaURL == null) {
@@ -39,14 +43,7 @@ public abstract class DownloadingAsyncPrettyPrinterFactory implements AsyncPrett
             throws IOException {
           try {
             String schema = response.get();
-            if (schema != null) {
-              doPrint(output, payload, schema);
-            } else {
-              doErrorPrint(
-                  output,
-                  payload,
-                  "http get request for schema url fails to return a valid response");
-            }
+            doPrint(output, payload, schema);
           } catch (InterruptedException e) {
             doErrorPrint(
                 output,
@@ -54,11 +51,19 @@ public abstract class DownloadingAsyncPrettyPrinterFactory implements AsyncPrett
                 "Error while downloading schema for pretty printing: " + e.getMessage());
           } catch (ExecutionException e) {
             Throwable cause = e.getCause();
-            ExceptionUtil.propagateIfInstanceOf(cause, IOException.class);
-            throw ExceptionUtil.propagate(cause);
+            if (FileNotFoundException.class.isInstance(cause)) {
+              doErrorPrint(
+                  output,
+                  payload,
+                  "Error while downloading schema for pretty printing: " + e.getMessage());
+            } else {
+              ExceptionUtil.propagateIfInstanceOf(cause, IOException.class);
+              throw ExceptionUtil.propagate(cause);
+            }
           }
         }
-        public DownloadingAsyncPrettyPrinterFactory.PrettyPrinterDisplayType getPrettifiedType() {
+
+        public PrettyPrinterDisplayType getPrettifiedType() {
           return result.getDisplayType();
         }
       };
@@ -89,7 +94,7 @@ public abstract class DownloadingAsyncPrettyPrinterFactory implements AsyncPrett
   }
 
   private static void doErrorPrint(PrintWriter output, InputStream payload, String errorMessage)
-    throws IOException {
+      throws IOException {
     output.print(errorMessage + "\n" + Util.readAsUTF8(payload));
   }
 
@@ -112,25 +117,9 @@ public abstract class DownloadingAsyncPrettyPrinterFactory implements AsyncPrett
   }
 
 
-  public enum PrettyPrinterDisplayType {
-    JSON("Json"),
-    HTML("Html"),
-    TEXT("Text");
-
-    private final String mDisplayType;
-
-    private PrettyPrinterDisplayType(String displayType) {
-      mDisplayType = displayType;
-    }
-
-    public String getDisplayType() {
-      return mDisplayType;
-    }
-  }
-
   protected class MatchResult {
-    private String mSchemaUri;
-    private PrettyPrinterDisplayType mDisplayType;
+    private final String mSchemaUri;
+    private final PrettyPrinterDisplayType mDisplayType;
 
     public MatchResult(String schemaUri, PrettyPrinterDisplayType displayType) {
       mSchemaUri = schemaUri;
@@ -146,24 +135,19 @@ public abstract class DownloadingAsyncPrettyPrinterFactory implements AsyncPrett
     }
   }
 
-  private class Request implements Callable<String> {
+  private static class Request implements Callable<String> {
     private URL url;
 
     public Request(URL url) {
       this.url = url;
     }
 
-    @Override @Nullable
-    public String call() {
-      try {
-        InputStream urlStream = url.openStream();
-        String result = Util.readAsUTF8(urlStream);
-        urlStream.close();
-        return result;
-      }
-      catch (IOException e) {
-        return null;
-      }
+    @Override
+    public String call() throws IOException {
+      InputStream urlStream = url.openStream();
+      String result = Util.readAsUTF8(urlStream);
+      urlStream.close();
+      return result;
     }
   }
 }

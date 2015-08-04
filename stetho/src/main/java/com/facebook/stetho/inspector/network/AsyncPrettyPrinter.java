@@ -35,5 +35,5 @@ public interface AsyncPrettyPrinter {
    *
    * @return an enum defined by PrettyPrinterDisplayType class
    */
-  public DownloadingAsyncPrettyPrinterFactory.PrettyPrinterDisplayType getPrettifiedType();
+  public PrettyPrinterDisplayType getPrettifiedType();
 }

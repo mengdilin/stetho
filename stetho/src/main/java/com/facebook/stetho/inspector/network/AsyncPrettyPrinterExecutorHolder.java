@@ -15,6 +15,6 @@ import java.util.concurrent.Executors;
 /**
  * A holder class for the executor service used for pretty printing related tasks
  */
-public class AsyncPrettyPrinterExecutorHolder {
-  public final static ExecutorService sExecutorService = Executors.newCachedThreadPool();
+class AsyncPrettyPrinterExecutorHolder {
+  public static final ExecutorService sExecutorService = Executors.newCachedThreadPool();
 }
