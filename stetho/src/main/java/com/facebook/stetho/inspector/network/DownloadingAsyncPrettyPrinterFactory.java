@@ -1,6 +1,5 @@
 package com.facebook.stetho.inspector.network;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -30,7 +29,7 @@ public abstract class DownloadingAsyncPrettyPrinterFactory implements AsyncPrett
 
     final MatchResult result = matchAndParseHeader(headerName, headerValue);
     if (result == null) {
-      return getErrorAsyncPrettyPrinter(headerName, headerValue);
+      return null;
     }
     String uri = result.getSchemaUri();
     URL schemaURL = parseURL(uri);
@@ -42,24 +41,31 @@ public abstract class DownloadingAsyncPrettyPrinterFactory implements AsyncPrett
         public void printTo(PrintWriter output, InputStream payload)
             throws IOException {
           try {
-            String schema = response.get();
+            String schema = null;
+            try {
+              schema = response.get();
+            } catch (ExecutionException e) {
+              Throwable cause = e.getCause();
+              if (IOException.class.isInstance(cause)) {
+                doErrorPrint(
+                    output,
+                    payload,
+                    "Cannot successfully download schema: "
+                        + e.getMessage());
+              } else {
+                throw e;
+              }
+            }
             doPrint(output, payload, schema);
           } catch (InterruptedException e) {
             doErrorPrint(
                 output,
                 payload,
-                "Error while downloading schema for pretty printing: " + e.getMessage());
+                "Encountered spurious interrupt while downloading schema for pretty printing: "
+                    + e.getMessage());
           } catch (ExecutionException e) {
             Throwable cause = e.getCause();
-            if (FileNotFoundException.class.isInstance(cause)) {
-              doErrorPrint(
-                  output,
-                  payload,
-                  "Error while downloading schema for pretty printing: " + e.getMessage());
-            } else {
-              ExceptionUtil.propagateIfInstanceOf(cause, IOException.class);
-              throw ExceptionUtil.propagate(cause);
-            }
+            throw ExceptionUtil.propagate(cause);
           }
         }
 
@@ -81,6 +87,10 @@ public abstract class DownloadingAsyncPrettyPrinterFactory implements AsyncPrett
   @Nullable
   protected abstract MatchResult matchAndParseHeader(String headerName, String headerValue);
 
+  /**
+   * Note that the IOException thrown by this method will be propagated all the way up and
+   * yield an error to the chrome devtools
+   */
   protected abstract void doPrint(PrintWriter output, InputStream payload, String schema)
       throws IOException;
 

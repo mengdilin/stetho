@@ -22,8 +22,9 @@ public enum PrettyPrinterDisplayType {
     mResourceType = resourceType;
   }
 
-  /** Converts PrettyPrinterDisplayType values to the appropriate
-   *  Page.ResourceType values that Stetho understands
+  /**
+   * Converts PrettyPrinterDisplayType values to the appropriate
+   *  {@link Page.ResourceType} values that Stetho understands
    */
   public Page.ResourceType getResourceType() {
     return mResourceType;
