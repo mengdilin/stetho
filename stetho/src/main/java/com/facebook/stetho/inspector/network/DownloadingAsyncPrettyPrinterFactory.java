@@ -41,7 +41,7 @@ public abstract class DownloadingAsyncPrettyPrinterFactory implements AsyncPrett
         public void printTo(PrintWriter output, InputStream payload)
             throws IOException {
           try {
-            String schema = null;
+            String schema;
             try {
               schema = response.get();
             } catch (ExecutionException e) {
@@ -52,6 +52,7 @@ public abstract class DownloadingAsyncPrettyPrinterFactory implements AsyncPrett
                     payload,
                     "Cannot successfully download schema: "
                         + e.getMessage());
+                return;
               } else {
                 throw e;
               }
