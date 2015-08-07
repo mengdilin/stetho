@@ -9,6 +9,10 @@
 
 package com.facebook.stetho.inspector.network;
 
+import android.app.Application;
+import android.content.Context;
+import android.test.AndroidTestCase;
+import android.test.mock.MockContentProvider;
 import com.facebook.stetho.common.Util;
 
 import static org.mockito.Mockito.mock;
@@ -19,7 +23,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.never;
 import static org.mockito.Matchers.any;
 
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
+import com.facebook.stetho.inspector.network.AsyncPrettyPrinterSchemaFileManager;
+import com.facebook.stetho.inspector.network.NetworkPeerManager;
 import org.junit.Before;
+import org.junit.runner.RunWith;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
@@ -34,10 +45,13 @@ import java.lang.Override;
 import java.lang.String;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.net.URL;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(NetworkPeerManager.class)
 public class AsyncPrettyPrintResponseBodyTest {
   private static final String TEST_REQUEST_ID = "1234";
   private static final String TEST_HEADER_NAME = "header name";
@@ -59,23 +73,34 @@ public class AsyncPrettyPrintResponseBodyTest {
   private PrettyPrinterTestFactory mPrettyPrinterTestFactory;
   private NetworkPeerManager mNetworkPeerManager;
   private ResponseBodyFileManager mResponseBodyFileManager;
+  private AsyncPrettyPrinterSchemaFileManager mAsyncPrettyPrinterSchemaFileManager;
 
   @Before
   public void setup() {
     mPrettyPrinterTestFactory = new PrettyPrinterTestFactory();
     mResponseBodyFileManager = mock(ResponseBodyFileManager.class);
-    mNetworkPeerManager = new NetworkPeerManager(mResponseBodyFileManager);
+    mAsyncPrettyPrinterSchemaFileManager = mock(AsyncPrettyPrinterSchemaFileManager.class);
+    mNetworkPeerManager = new NetworkPeerManager(
+        mResponseBodyFileManager,
+        mAsyncPrettyPrinterSchemaFileManager);
+    PowerMockito.mockStatic(NetworkPeerManager.class);
+    when(NetworkPeerManager.getInstanceOrNull()).thenReturn(mNetworkPeerManager);
     mAsyncPrettyPrinterRegistry = mNetworkPeerManager.getAsyncPrettyPrinterRegistry();
     mAsyncPrettyPrinterRegistry.register(TEST_HEADER_NAME, mPrettyPrinterTestFactory);
   }
 
   @Test
   public void testAsyncPrettyPrinterResult() throws IOException {
+
     StringWriter out = new StringWriter();
     PrintWriter writer = new PrintWriter(out);
+    when(mAsyncPrettyPrinterSchemaFileManager.readCache(any(URL.class)))
+        .thenReturn("place holder test schema");
     AsyncPrettyPrinter mAsyncPrettyPrinter = mPrettyPrinterTestFactory.getInstance(
         TEST_HEADER_NAME,
         TEST_HEADER_VALUE);
+    assert(mPrettyPrinterTestFactory != null);
+    assert(mAsyncPrettyPrinter != null);
     mAsyncPrettyPrinter.printTo(writer, mInputStream);
     assertEquals(PRETTY_PRINT_PREFIX + Arrays.toString(TEST_RESPONSE_BODY), out.toString());
   }
