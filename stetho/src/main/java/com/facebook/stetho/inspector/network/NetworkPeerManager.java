@@ -21,6 +21,7 @@ public class NetworkPeerManager extends ChromePeerManager {
 
   private final ResponseBodyFileManager mResponseBodyFileManager;
   private final AsyncPrettyPrinterRegistry mAsyncPrettyPrinterRegistry;
+  private final AsyncPrettyPrinterSchemaFileManager mAsyncPrettyPrinterSchemaFileManager;
 
   @Nullable
   public static synchronized NetworkPeerManager getInstanceOrNull() {
@@ -31,15 +32,20 @@ public class NetworkPeerManager extends ChromePeerManager {
     if (sInstance == null) {
       sInstance = new NetworkPeerManager(
           new ResponseBodyFileManager(
+              context.getApplicationContext()),
+          new AsyncPrettyPrinterSchemaFileManager(
               context.getApplicationContext()));
     }
     return sInstance;
   }
 
-  public NetworkPeerManager(ResponseBodyFileManager responseBodyFileManager) {
+  public NetworkPeerManager(
+      ResponseBodyFileManager responseBodyFileManager,
+      AsyncPrettyPrinterSchemaFileManager asyncPrettyPrinterSchemaFileManager) {
     mResponseBodyFileManager = responseBodyFileManager;
     setListener(mTempFileCleanup);
     mAsyncPrettyPrinterRegistry = new AsyncPrettyPrinterRegistry();
+    mAsyncPrettyPrinterSchemaFileManager = asyncPrettyPrinterSchemaFileManager;
   }
 
   public ResponseBodyFileManager getResponseBodyFileManager() {
@@ -48,6 +54,10 @@ public class NetworkPeerManager extends ChromePeerManager {
 
   public AsyncPrettyPrinterRegistry getAsyncPrettyPrinterRegistry() {
     return mAsyncPrettyPrinterRegistry;
+  }
+
+  public AsyncPrettyPrinterSchemaFileManager getAsyncPrettyPrinterSchemaFileManager() {
+    return mAsyncPrettyPrinterSchemaFileManager;
   }
 
   private final PeersRegisteredListener mTempFileCleanup = new PeersRegisteredListener() {
@@ -60,6 +70,7 @@ public class NetworkPeerManager extends ChromePeerManager {
     protected void onLastPeerUnregistered() {
       mResponseBodyFileManager.cleanupFiles();
       AsyncPrettyPrinterExecutorHolder.sExecutorService.shutdownNow();
+      mAsyncPrettyPrinterSchemaFileManager.cleanupFiles();
     }
   };
 }

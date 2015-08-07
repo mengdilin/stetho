@@ -2,6 +2,7 @@ package com.facebook.stetho.inspector.network;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -147,7 +148,7 @@ public abstract class DownloadingAsyncPrettyPrinterFactory implements AsyncPrett
   }
 
   private static class Request implements Callable<String> {
-    private URL url;
+    private final URL url;
 
     public Request(URL url) {
       this.url = url;
@@ -155,10 +156,21 @@ public abstract class DownloadingAsyncPrettyPrinterFactory implements AsyncPrett
 
     @Override
     public String call() throws IOException {
-      InputStream urlStream = url.openStream();
-      String result = Util.readAsUTF8(urlStream);
-      urlStream.close();
-      return result;
+      NetworkPeerManager peerManager = NetworkPeerManager.getInstanceOrNull();
+      AsyncPrettyPrinterSchemaFileManager schemaFileManager
+          = peerManager.getAsyncPrettyPrinterSchemaFileManager();
+      String cacheSchema = schemaFileManager.readCache(url);
+      if (cacheSchema != null) {
+        return cacheSchema;
+      } else {
+        InputStream urlStream = url.openStream();
+        String result = Util.readAsUTF8(urlStream);
+        urlStream.close();
+        OutputStream cacheSchemaOutputStream = schemaFileManager.openNewSchemaCache(url);
+        cacheSchemaOutputStream.write(result.getBytes());
+        cacheSchemaOutputStream.close();
+        return result;
+      }
     }
   }
 }
